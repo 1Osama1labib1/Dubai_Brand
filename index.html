@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dubai Brand | دبي براند</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Tajawal', 'sans-serif'] },
+                    colors: {
+                        gold: { 400: '#FBBF24', 500: '#D4AF37', 600: '#B8860B' },
+                        dark: '#111111'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #FAFAFA; }
+        .view-section { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #B8860B; }
+        
+        /* Modal Animation & Sold Out Effects */
+        .modal-enter { animation: modalFadeIn 0.3s ease-out forwards; }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .out-of-stock-img { filter: grayscale(100%) opacity(50%); }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col min-h-screen">
+
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex-shrink-0 cursor-pointer flex items-center" onclick="navigate('home')">
+                    <h1 class="text-2xl md:text-3xl font-black tracking-wider text-dark">
+                        DUBAI <span class="text-gold-500">BRAND</span>
+                    </h1>
+                </div>
+                
+                <div class="hidden md:flex space-x-8 space-x-reverse font-bold text-gray-600">
+                    <button onclick="navigate('home')" class="hover:text-gold-500 transition">الرئيسية</button>
+                    <button onclick="navigate('shop', 'all')" class="hover:text-gold-500 transition">جميع المنتجات</button>
+                    <div class="relative group">
+                        <button class="hover:text-gold-500 transition flex items-center gap-1">الأقسام <i class="fa-solid fa-chevron-down text-xs"></i></button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-lg py-2 hidden group-hover:block border border-gray-100 max-h-[70vh] overflow-y-auto">
+                            <button onclick="navigate('shop', 'clothes')" class="block w-full text-right px-4 py-2 hover:bg-gold-50 hover:text-gold-600">ملابس خروج</button>
+                            <button onclick="navigate('shop', 'homewear')" class="block w-full text-right px-4 py-2 hover:bg-gold-50 hover:text-gold-600">ملابس بيتي</button>
+                            <button onclick="navigate('shop', 'bags')" class="block w-full text-right px-4 py-2 hover:bg-gold-50 hover:text-gold-600">شنط</button>
+                            <button onclick="navigate('shop', 'heels')" class="block w-full text-right px-4 py-2 hover:bg-gold-50 hover:text-gold-600">هيلز</button>
+                            <button onclick="navigate('shop', 'sneakers')" class="block w-full text-right px-4 py-2 hover:bg-gold-50 hover:text-gold-600">كوتشيات</button>
+                            <button onclick="navigate('shop', 'perfumes')" class="block w-full text-right px-4 py-2 hover:bg-gold-50 hover:text-gold-600">عطور</button>
+                            <button onclick="navigate('shop', 'watches')" class="block w-full text-right px-4 py-2 hover:bg-gold-50 hover:text-gold-600">ساعات</button>
+                            <button onclick="navigate('shop', 'kids')" class="block w-full text-right px-4 py-2 hover:bg-gold-50 hover:text-gold-600">أطفالي</button>
+                        </div>
+                    </div>
+                    <button onclick="openLocationModal()" class="text-gold-600 hover:text-dark transition flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot"></i> عنوان المحل
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-gray-600 text-2xl" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
+            <div class="px-4 py-2 space-y-1">
+                <button onclick="navigate('home'); this.parentElement.parentElement.classList.add('hidden')" class="block w-full text-right py-2 font-bold text-gray-700">الرئيسية</button>
+                <button onclick="navigate('shop', 'all'); this.parentElement.parentElement.classList.add('hidden')" class="block w-full text-right py-2 font-bold text-gray-700">جميع المنتجات</button>
+                <button onclick="openLocationModal(); this.parentElement.parentElement.classList.add('hidden')" class="block w-full text-right py-2 font-bold text-gold-600"><i class="fa-solid fa-location-dot ml-2"></i>عنوان المحل</button>
+                <div class="border-t border-gray-100 my-2 pt-2">
+                    <p class="text-sm text-gray-400 mb-2">الأقسام</p>
+                    <div id="mobile-categories-list" class="grid grid-cols-2 gap-2 text-sm max-h-60 overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        
+        <div id="view-home" class="view-section active">
+            <div class="relative bg-dark h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2000" class="absolute inset-0 w-full h-full object-cover opacity-50" alt="صورة غلاف الموقع">
+                <div class="relative z-10 text-center px-4">
+                    <h2 class="text-4xl md:text-6xl font-black text-white mb-6">اكتشفي الفخامة مع <br><span class="text-gold-500">دبي براند</span></h2>
+                    <p class="text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">تصفحي تشكيلتنا الحصرية من الأزياء والحقائب. نتشرف بزيارتكم في مقرنا لاقتناء ما يعجبكم.</p>
+                    <button onclick="navigate('shop', 'all')" class="bg-gold-500 hover:bg-gold-600 text-white font-bold py-4 px-10 rounded-full text-lg shadow-lg shadow-gold-500/30 transition transform hover:scale-105">
+                        تصفحي المنتجات الآن
+                    </button>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 py-12">
+                <h3 class="text-2xl font-bold mb-8 text-center border-b-2 border-gold-500 inline-block pb-2">أقسام المعرض</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4" id="home-categories-grid"></div>
+            </div>
+
+            <div class="bg-white py-16">
+                <div class="max-w-7xl mx-auto px-4">
+                    <div class="flex justify-between items-center mb-10">
+                        <h3 class="text-3xl font-black">أحدث المعروضات</h3>
+                        <button onclick="navigate('shop', 'all')" class="text-gold-600 font-bold hover:underline">عرض الكل <i class="fa-solid fa-arrow-left text-sm"></i></button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="featured-products"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-shop" class="view-section py-12 max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-black mb-8" id="shop-title">جميع المنتجات المعروضة</h2>
+            <div class="flex gap-2 overflow-x-auto pb-4 mb-8" id="shop-filters"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" id="shop-products"></div>
+            <div id="shop-empty" class="hidden text-center py-20">
+                <i class="fa-solid fa-box-open text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-2xl font-bold text-gray-500">لا توجد منتجات معروضة في هذا القسم حالياً</h3>
+            </div>
+        </div>
+
+        <div id="view-product-details" class="view-section py-12 max-w-7xl mx-auto px-4">
+            <button onclick="navigate('shop', 'all')" class="mb-6 text-gray-500 hover:text-gold-600 font-bold flex items-center gap-2">
+                <i class="fa-solid fa-arrow-right"></i> العودة للمعرض
+            </button>
+            
+            <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden flex flex-col md:flex-row relative">
+                
+                <div id="detail-badge-container"></div>
+
+                <div class="md:w-1/2 p-4 md:p-8 flex justify-center items-center bg-gray-50 relative">
+                    <img id="detail-image" src="" alt="صورة المنتج المكبرة" class="max-h-[500px] object-contain rounded-xl mix-blend-multiply transition duration-300">
+                </div>
+
+                <div class="md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
+                    <span id="detail-category" class="text-sm font-bold text-gold-600 mb-2 uppercase tracking-wider bg-gold-50 inline-block px-3 py-1 rounded-full w-max"></span>
+                    <h2 id="detail-title" class="text-3xl md:text-4xl font-black text-dark mb-4"></h2>
+                    <p id="detail-price" class="text-3xl font-bold text-gray-900 mb-6"></p>
+                    
+                    <div class="mb-8">
+                        <h4 class="font-bold text-gray-900 mb-2">مواصفات المنتج:</h4>
+                        <p id="detail-desc" class="text-gray-600 leading-relaxed"></p>
+                    </div>
+
+                    <div id="detail-action-box" class="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center mt-auto">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-admin-login" class="view-section py-20 px-4">
+            <div class="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-2xl border border-gray-100 text-center">
+                <div class="w-20 h-20 bg-dark rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"><i class="fa-solid fa-lock text-gold-500 text-3xl"></i></div>
+                <h2 class="text-2xl font-black mb-8">تسجيل الدخول للإدارة</h2>
+                <div id="login-error" class="hidden bg-red-50 text-red-600 font-bold p-3 rounded-lg mb-4 text-sm"></div>
+                <form onsubmit="adminLogin(event)" class="space-y-5 text-right">
+                    <div><label class="block text-sm font-bold mb-2">اسم المستخدم</label><input type="text" id="admin-user" required dir="ltr" class="w-full px-4 py-3 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                    <div><label class="block text-sm font-bold mb-2">كلمة المرور</label><input type="password" id="admin-pass" required dir="ltr" class="w-full px-4 py-3 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                    <button type="submit" class="w-full bg-gold-600 hover:bg-dark text-white font-bold py-4 rounded-xl shadow-lg transition duration-300 mt-4">دخول</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-admin-dashboard" class="view-section py-12 max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b-2 border-dark pb-4">
+                <h2 class="text-3xl font-black flex items-center gap-3"><i class="fa-solid fa-shield-halved text-gold-500"></i> لوحة التحكم</h2>
+                <button onclick="adminLogout()" class="mt-4 md:mt-0 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-2 px-6 rounded-full transition flex items-center gap-2">تسجيل خروج <i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 sticky top-24">
+                        <h3 class="text-xl font-bold mb-6 border-b pb-2"><i class="fa-solid fa-plus-circle text-gold-500"></i> إضافة منتج للمعرض</h3>
+                        <form onsubmit="addProduct(event)" class="space-y-4">
+                            <div><label class="block text-sm font-bold mb-1">الاسم</label><input type="text" id="add-name" required class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                            <div><label class="block text-sm font-bold mb-1">السعر (ج.م)</label><input type="number" id="add-price" required min="0" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                            <div>
+                                <label class="block text-sm font-bold mb-1">القسم</label>
+                                <select id="add-category" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none">
+                                    <option value="clothes">ملابس خروج</option><option value="homewear">ملابس بيتي</option>
+                                    <option value="bags">شنط</option><option value="heels">هيلز</option>
+                                    <option value="sneakers">كوتشيات</option><option value="perfumes">عطور</option>
+                                    <option value="watches">ساعات</option><option value="kids">أطفالي</option>
+                                </select>
+                            </div>
+                            <div><label class="block text-sm font-bold mb-1">رابط الصورة (URL)</label><input type="url" id="add-image" required dir="ltr" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none text-left"></div>
+                            <div><label class="block text-sm font-bold mb-1">الوصف</label><textarea id="add-desc" rows="2" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none resize-none"></textarea></div>
+                            <button type="submit" class="w-full bg-dark hover:bg-gold-500 text-white font-bold py-3 rounded-xl transition mt-2">نشر في المعرض</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+                        <div class="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-xl font-bold">المنتجات المعروضة (<span id="admin-product-count">0</span>)</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right">
+                                <thead>
+                                    <tr class="text-gray-500 text-sm border-b">
+                                        <th class="p-4">المنتج</th>
+                                        <th class="p-4">القسم</th>
+                                        <th class="p-4">السعر</th>
+                                        <th class="p-4 text-center">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-product-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-dark text-white pt-16 pb-8 border-t-4 border-gold-500 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div>
+                <h2 class="text-3xl font-black mb-4">DUBAI <span class="text-gold-500">BRAND</span></h2>
+                <p class="text-gray-400">الوجهة الأولى للأناقة العصرية والفخامة. نوفر لك تشكيلة راقية من أشهر خطوط الموضة.</p>
+            </div>
+            <div>
+                <h4 class="text-xl font-bold mb-4 text-gold-500">مقرنا الرئيسي</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><i class="fa-solid fa-map-location-dot ml-2 text-gold-500"></i> محافظة البحيرة - مركز شبراخيت</li>
+                    <li><i class="fa-solid fa-location-arrow ml-2 text-gold-500"></i> الشارع الجديد - برج العاصمة</li>
+                    <li><i class="fa-solid fa-building ml-2 text-gold-500"></i> الدور الثاني - محل Dubai Brand</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-xl font-bold mb-4 text-gold-500">تواصل معنا</h4>
+                <div class="flex space-x-4 space-x-reverse text-2xl text-gray-400">
+                    <a href="https://www.facebook.com/share/1E94x46zZF/" target="_blank" class="hover:text-[#1877F2] transition" title="فيسبوك"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://wa.me/201144330454" target="_blank" class="hover:text-[#25D366] transition" title="واتساب"><i class="fa-brands fa-whatsapp"></i></a>
+                    <a href="https://www.instagram.com/dubaibrand164?igsh=cGw4MGp0bzNzcDM1" target="_blank" class="hover:text-[#E1306C] transition" title="انستجرام"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center text-gray-600 text-sm border-t border-gray-800 pt-8 relative">
+            <p>© 2026 دبي براند. جميع الحقوق محفوظة.</p>
+            <button onclick="navigate('admin-login')" class="absolute bottom-8 left-4 text-gray-800 hover:text-gray-400" title="Control Panel"><i class="fa-solid fa-lock text-[10px]"></i></button>
+        </div>
+    </footer>
+
+    <div id="locationModal" class="fixed inset-0 z-[100] bg-black bg-opacity-60 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden relative modal-enter">
+            <button onclick="closeLocationModal()" class="absolute top-4 left-4 text-gray-400 hover:text-red-500 text-xl z-10 transition"><i class="fa-solid fa-xmark"></i></button>
+            <div class="bg-dark p-6 text-center text-white border-b-4 border-gold-500">
+                <div class="w-16 h-16 bg-gold-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg border-4 border-dark"><i class="fa-solid fa-store"></i></div>
+                <h3 class="text-2xl font-black">مقر محل Dubai Brand</h3>
+            </div>
+            <div class="p-8">
+                <p class="text-gray-600 text-center mb-6 text-sm">نتشرف بزيارتكم لمعاينة المنتجات واستلامها يداً بيد في مقرنا التالي:</p>
+                <ul class="space-y-4 font-bold text-gray-800 text-lg bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-map text-gold-500 w-5"></i> محافظة البحيرة</li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-location-dot text-gold-500 w-5"></i> مركز شبراخيت</li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-road text-gold-500 w-5"></i> الشارع الجديد</li>
+                    <li class="flex items-center gap-3"><i class="fa-regular fa-building text-gold-500 w-5"></i> برج العاصمة (الدور الثاني)</li>
+                </ul>
+                <button onclick="closeLocationModal()" class="w-full mt-6 bg-gold-500 hover:bg-dark text-white font-bold py-3 rounded-xl transition duration-300">حسناً، فهمت</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 z-[100] bg-black bg-opacity-60 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden relative modal-enter">
+            <button onclick="closeEditModal()" class="absolute top-4 left-4 text-gray-400 hover:text-red-500 text-xl z-10 transition"><i class="fa-solid fa-xmark"></i></button>
+            <div class="bg-dark p-6 text-center text-white border-b-4 border-gold-500">
+                <h3 class="text-2xl font-black"><i class="fa-solid fa-pen-to-square text-gold-500 ml-2"></i>تعديل المنتج</h3>
+            </div>
+            <div class="p-6">
+                <form onsubmit="saveEditProduct(event)" class="space-y-4 text-right">
+                    <input type="hidden" id="edit-id">
+                    <div><label class="block text-sm font-bold mb-1">الاسم</label><input type="text" id="edit-name" required class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                    <div><label class="block text-sm font-bold mb-1">السعر (ج.م)</label><input type="number" id="edit-price" required min="0" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none"></div>
+                    <div>
+                        <label class="block text-sm font-bold mb-1">القسم</label>
+                        <select id="edit-category" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none">
+                            <option value="clothes">ملابس خروج</option><option value="homewear">ملابس بيتي</option>
+                            <option value="bags">شنط</option><option value="heels">هيلز</option>
+                            <option value="sneakers">كوتشيات</option><option value="perfumes">عطور</option>
+                            <option value="watches">ساعات</option><option value="kids">أطفالي</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-sm font-bold mb-1">رابط الصورة (URL)</label><input type="url" id="edit-image" required dir="ltr" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none text-left"></div>
+                    <div><label class="block text-sm font-bold mb-1">الوصف</label><textarea id="edit-desc" rows="2" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none resize-none"></textarea></div>
+                    <button type="submit" class="w-full mt-4 bg-gold-500 hover:bg-dark text-white font-bold py-3 rounded-xl transition duration-300">حفظ التعديلات</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-4 right-4 bg-dark text-white px-6 py-4 rounded-xl shadow-2xl border-r-4 border-gold-500 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3">
+        <i class="fa-solid fa-check-circle text-gold-500 text-xl"></i>
+        <span id="toast-msg" class="font-bold"></span>
+    </div>
+
+    <script>
+        // 1. Data Definitions
+        const categories = [
+            { id: 'all', name: 'الكل', icon: 'fa-border-all' },
+            { id: 'clothes', name: 'ملابس خروج', icon: 'fa-shirt' },
+            { id: 'homewear', name: 'ملابس بيتي', icon: 'fa-house-user' },
+            { id: 'bags', name: 'شنط', icon: 'fa-bag-shopping' },
+            { id: 'heels', name: 'هيلز', icon: 'fa-shoe-prints' },
+            { id: 'sneakers', name: 'كوتشيات', icon: 'fa-shoe-prints' },
+            { id: 'perfumes', name: 'عطور', icon: 'fa-spray-can-sparkles' },
+            { id: 'watches', name: 'ساعات', icon: 'fa-clock' },
+            { id: 'kids', name: 'أطفالي', icon: 'fa-child' }
+        ];
+
+        // بيانات تجريبية مع اضافة حالة النفاذ isSoldOut
+        const defaultProducts = [
+            { id: 1, name: 'فستان سهرة كلاسيك', price: 15000, category: 'clothes', isSoldOut: false, image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&q=80&w=800', desc: 'فستان سهرة راقي.' },
+            { id: 2, name: 'طقم بيجاما حرير بيتي', price: 2500, category: 'homewear', isSoldOut: false, image: 'https://images.unsplash.com/photo-1618218168350-6e7c81151b64?auto=format&fit=crop&q=80&w=800', desc: 'طقم بيجاما مريح.' },
+            { id: 3, name: 'حقيبة جلد برادا ستايل', price: 4500, category: 'bags', isSoldOut: false, image: 'https://images.unsplash.com/photo-1584916201218-f4242ceb4809?auto=format&fit=crop&q=80&w=800', desc: 'حقيبة جلدية فاخرة.' },
+            { id: 9, name: 'حذاء كعب عالي (هيلز) أسود', price: 3200, category: 'heels', isSoldOut: true, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=800', desc: 'هيلز أسود كلاسيكي (منتج تجريبي مباع).' },
+            { id: 10, name: 'كوتشي أبيض رياضي', price: 1800, category: 'sneakers', isSoldOut: false, image: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&q=80&w=800', desc: 'كوتشي كاجوال خفيف.' },
+            { id: 4, name: 'عطر دبي عود الذهبي', price: 3500, category: 'perfumes', isSoldOut: false, image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800', desc: 'عطر شرقي بلمسة فرنسية.' },
+            { id: 5, name: 'ساعة رولكس ستايل نسائية', price: 8500, category: 'watches', isSoldOut: false, image: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&q=80&w=800', desc: 'ساعة معدنية.' },
+            { id: 6, name: 'طقم أطفال للعيد', price: 1200, category: 'kids', isSoldOut: false, image: 'https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=800', desc: 'طقم أنيق للأطفال.' },
+        ];
+
+        // 2. State Management
+        let products = JSON.parse(localStorage.getItem('dubaiBrandProductsDisplay')) || defaultProducts;
+        
+        // إصلاح المنتجات القديمة لإضافة خاصية isSoldOut لها إذا لم تكن موجودة
+        products = products.map(p => ({...p, isSoldOut: p.isSoldOut || false}));
+
+        // 3. Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategoriesUI();
+            navigate('home');
+        });
+
+        // 4. Navigation
+        function navigate(view, params = null) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            const targetView = document.getElementById(`view-${view}`);
+            if(targetView) targetView.classList.add('active');
+            window.scrollTo(0, 0);
+
+            if (view === 'home') renderHomeProducts();
+            else if (view === 'shop') renderShop(params || 'all');
+            else if (view === 'product-details' && params) renderProductDetails(params);
+            else if (view === 'admin-dashboard') {
+                if(sessionStorage.getItem('dubaiAdmin') !== 'true') return navigate('admin-login');
+                renderAdminDashboard();
+            }
+        }
+
+        // 5. UI Renderers
+        function renderCategoriesUI() {
+            const mobileMenu = document.getElementById('mobile-categories-list');
+            const homeGrid = document.getElementById('home-categories-grid');
+            const shopFilters = document.getElementById('shop-filters');
+            let mobileHtml = '', homeHtml = '', filtersHtml = '';
+
+            categories.forEach(cat => {
+                if(cat.id !== 'all') {
+                    mobileHtml += `<button onclick="navigate('shop', '${cat.id}'); document.getElementById('mobile-menu').classList.add('hidden')" class="text-right hover:text-gold-500"><i class="fa-solid ${cat.icon} ml-1"></i> ${cat.name}</button>`;
+                    homeHtml += `
+                        <div onclick="navigate('shop', '${cat.id}')" class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-lg transition cursor-pointer border border-gray-100 group">
+                            <div class="w-12 h-12 lg:w-16 lg:h-16 mx-auto bg-gold-50 group-hover:bg-gold-500 rounded-full flex items-center justify-center transition duration-300 mb-4">
+                                <i class="fa-solid ${cat.icon} text-xl lg:text-2xl text-gold-600 group-hover:text-white transition duration-300"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-800 text-sm lg:text-base">${cat.name}</h4>
+                        </div>`;
+                }
+                filtersHtml += `<button onclick="renderShop('${cat.id}')" class="filter-btn px-6 py-2 rounded-full font-bold whitespace-nowrap transition border ${cat.id === 'all' ? 'bg-dark text-white border-dark' : 'bg-white text-gray-600 border-gray-200 hover:border-gold-500 hover:text-gold-600'}" data-id="${cat.id}">${cat.name}</button>`;
+            });
+            mobileMenu.innerHTML = mobileHtml;
+            homeGrid.innerHTML = homeHtml;
+            shopFilters.innerHTML = filtersHtml;
+        }
+
+        function generateProductCardHTML(product) {
+            const soldOutBadge = product.isSoldOut ? `<span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-4 py-1.5 rounded-full z-20 shadow-md">نفذت الكمية</span>` : '';
+            const imgClass = product.isSoldOut ? 'out-of-stock-img' : '';
+            
+            const btnHtml = product.isSoldOut 
+                ? `<button disabled class="w-full bg-gray-200 text-gray-500 font-bold py-2 rounded-lg cursor-not-allowed flex justify-center items-center gap-2"><i class="fa-solid fa-ban"></i> غير متوفر حالياً</button>`
+                : `<button onclick="event.stopPropagation(); openLocationModal()" class="w-full bg-gray-100 hover:bg-gold-500 hover:text-white text-gray-700 font-bold py-2 rounded-lg transition duration-300 flex justify-center items-center gap-2"><i class="fa-solid fa-location-dot"></i> طريقة الشراء</button>`;
+
+            return `
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-gray-100 group cursor-pointer flex flex-col relative" onclick="navigate('product-details', ${product.id})">
+                    ${soldOutBadge}
+                    <div class="relative h-64 overflow-hidden bg-gray-50 flex justify-center items-center">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500 mix-blend-multiply ${imgClass}" onerror="this.src='https://images.unsplash.com/photo-1555529771-835f59fc5efe?auto=format&fit=crop&q=80&w=800'">
+                    </div>
+                    <div class="p-5 relative z-10 bg-white flex-1 flex flex-col justify-between">
+                        <div>
+                            <p class="text-xs text-gold-600 font-bold mb-1">${getCategoryName(product.category)}</p>
+                            <h3 class="text-lg font-bold text-dark mb-2 line-clamp-1 ${product.isSoldOut ? 'text-gray-400' : ''}">${product.name}</h3>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <span class="text-2xl font-black text-dark block mb-3 ${product.isSoldOut ? 'text-gray-400' : ''}">${product.price.toLocaleString('en-US')} <span class="text-sm font-normal">ج.م</span></span>
+                            ${btnHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHomeProducts() {
+            const container = document.getElementById('featured-products');
+            const latest = [...products].reverse().slice(0, 4);
+            container.innerHTML = latest.map(generateProductCardHTML).join('');
+        }
+
+        function renderShop(categoryId) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = btn.dataset.id === categoryId 
+                    ? "filter-btn px-6 py-2 rounded-full font-bold whitespace-nowrap transition border bg-dark text-white border-dark"
+                    : "filter-btn px-6 py-2 rounded-full font-bold whitespace-nowrap transition border bg-white text-gray-600 border-gray-200 hover:border-gold-500 hover:text-gold-600";
+            });
+
+            let filtered = categoryId === 'all' ? products : products.filter(p => p.category === categoryId);
+            const container = document.getElementById('shop-products');
+            const emptyState = document.getElementById('shop-empty');
+            
+            if(filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                container.innerHTML = filtered.map(generateProductCardHTML).join('');
+            }
+        }
+
+        // 6. Product Details Logic
+        function renderProductDetails(productId) {
+            const product = products.find(p => p.id === productId);
+            if(!product) return navigate('shop', 'all');
+
+            const imgElement = document.getElementById('detail-image');
+            imgElement.src = product.image;
+            document.getElementById('detail-category').innerText = getCategoryName(product.category);
+            document.getElementById('detail-title').innerText = product.name;
+            document.getElementById('detail-price').innerText = `${product.price.toLocaleString('en-US')} ج.م`;
+            document.getElementById('detail-desc').innerText = product.desc || 'لا يوجد مواصفات إضافية لهذا المنتج.';
+            
+            const badgeContainer = document.getElementById('detail-badge-container');
+            const actionBox = document.getElementById('detail-action-box');
+
+            if (product.isSoldOut) {
+                imgElement.classList.add('out-of-stock-img');
+                badgeContainer.innerHTML = `<span class="absolute top-6 left-6 bg-red-600 text-white font-bold px-4 py-2 rounded-full z-20 shadow-md">نفذت الكمية</span>`;
+                actionBox.innerHTML = `
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-red-500 text-3xl shadow-sm mx-auto mb-4">
+                        <i class="fa-solid fa-ban"></i>
+                    </div>
+                    <h4 class="font-black text-gray-800 text-xl mb-2">المنتج غير متوفر</h4>
+                    <p class="text-gray-500 mb-4 text-sm leading-relaxed">عذراً، لقد نفذت كمية هذا المنتج بالكامل من المعرض.</p>
+                `;
+            } else {
+                imgElement.classList.remove('out-of-stock-img');
+                badgeContainer.innerHTML = '';
+                const whatsappMsg = encodeURIComponent(`مرحباً، أريد حجز هذا المنتج من دبي براند:\nاسم المنتج: ${product.name}\nالسعر: ${product.price.toLocaleString('en-US')} ج.م`);
+                actionBox.innerHTML = `
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-gold-500 text-2xl shadow-sm mx-auto mb-4">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+                    <h4 class="font-black text-dark text-xl mb-2">طريقة الشراء</h4>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">نتشرف بزيارتكم في الفرع الرئيسي لمعاينة المنتج، أو يمكنك التواصل معنا لحجزه.</p>
+                    <div class="flex flex-col gap-3">
+                        <button onclick="openLocationModal()" class="w-full bg-dark hover:bg-gold-500 text-white font-bold py-3 rounded-xl transition duration-300 shadow-md flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-location-dot"></i> عرض عنوان المحل
+                        </button>
+                        <a href="https://wa.me/201144330454?text=${whatsappMsg}" target="_blank" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition duration-300 shadow-md flex justify-center items-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-xl"></i> تواصل واتساب للحجز
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        // Modals
+        function openLocationModal() { document.getElementById('locationModal').classList.remove('hidden'); }
+        function closeLocationModal() { document.getElementById('locationModal').classList.add('hidden'); }
+        document.getElementById('locationModal').addEventListener('click', function(e) { if (e.target === this) closeLocationModal(); });
+
+        function openEditModal(id) {
+            const p = products.find(x => x.id === id);
+            if(!p) return;
+            document.getElementById('edit-id').value = p.id;
+            document.getElementById('edit-name').value = p.name;
+            document.getElementById('edit-price').value = p.price;
+            document.getElementById('edit-category').value = p.category;
+            document.getElementById('edit-image').value = p.image;
+            document.getElementById('edit-desc').value = p.desc || '';
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
+        document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
+
+        // 7. Admin Logic
+        function adminLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('admin-user').value;
+            const pass = document.getElementById('admin-pass').value;
+            const err = document.getElementById('login-error');
+
+            if (user === 'osama' && pass === '30595') {
+                sessionStorage.setItem('dubaiAdmin', 'true');
+                document.getElementById('admin-user').value = '';
+                document.getElementById('admin-pass').value = '';
+                err.classList.add('hidden');
+                navigate('admin-dashboard');
+                showToast('مرحباً بك في لوحة التحكم');
+            } else {
+                err.innerText = 'بيانات الدخول غير صحيحة';
+                err.classList.remove('hidden');
+            }
+        }
+
+        function adminLogout() {
+            sessionStorage.removeItem('dubaiAdmin');
+            navigate('home');
+            showToast('تم تسجيل الخروج');
+        }
+
+        function renderAdminDashboard() {
+            const list = document.getElementById('admin-product-list');
+            document.getElementById('admin-product-count').innerText = products.length;
+            
+            list.innerHTML = products.map(p => `
+                <tr class="border-b hover:bg-gray-50 transition ${p.isSoldOut ? 'bg-red-50/40' : ''}">
+                    <td class="p-4 flex items-center gap-3">
+                        <img src="${p.image}" class="w-12 h-12 rounded object-cover ${p.isSoldOut ? 'grayscale' : ''}">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-gray-800 line-clamp-1 ${p.isSoldOut ? 'text-gray-500 line-through' : ''}">${p.name}</span>
+                            ${p.isSoldOut ? `<span class="text-xs text-red-500 font-bold">مباع</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="p-4 text-gray-600 text-sm">${getCategoryName(p.category)}</td>
+                    <td class="p-4 font-bold text-gold-600">${p.price.toLocaleString('en-US')}</td>
+                    <td class="p-4 text-center whitespace-nowrap">
+                        <button onclick="toggleSoldOut(${p.id})" class="text-white font-bold text-xs p-2 rounded transition ${p.isSoldOut ? 'bg-green-500 hover:bg-green-600' : 'bg-orange-500 hover:bg-orange-600'}" title="${p.isSoldOut ? 'تغيير إلى متوفر' : 'تحديد كـ مباع'}">
+                            ${p.isSoldOut ? '<i class="fa-solid fa-check"></i> إرجاع متوفر' : '<i class="fa-solid fa-ban"></i> تحديد مباع'}
+                        </button>
+                        <button onclick="openEditModal(${p.id})" class="text-blue-500 hover:bg-blue-100 p-2 rounded transition mx-1" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteProduct(${p.id})" class="text-red-500 hover:bg-red-100 p-2 rounded transition" title="إزالة"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function addProduct(e) {
+            e.preventDefault();
+            const newProd = {
+                id: Date.now(),
+                name: document.getElementById('add-name').value,
+                price: parseFloat(document.getElementById('add-price').value),
+                category: document.getElementById('add-category').value,
+                image: document.getElementById('add-image').value,
+                desc: document.getElementById('add-desc').value,
+                isSoldOut: false
+            };
+
+            products.unshift(newProd);
+            localStorage.setItem('dubaiBrandProductsDisplay', JSON.stringify(products));
+            
+            e.target.reset();
+            renderAdminDashboard();
+            showToast('تم إضافة المنتج للمعرض بنجاح');
+        }
+
+        function saveEditProduct(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('edit-id').value);
+            const p = products.find(x => x.id === id);
+            if(p) {
+                p.name = document.getElementById('edit-name').value;
+                p.price = parseFloat(document.getElementById('edit-price').value);
+                p.category = document.getElementById('edit-category').value;
+                p.image = document.getElementById('edit-image').value;
+                p.desc = document.getElementById('edit-desc').value;
+                
+                localStorage.setItem('dubaiBrandProductsDisplay', JSON.stringify(products));
+                renderAdminDashboard();
+                closeEditModal();
+                showToast('تم تعديل المنتج بنجاح');
+            }
+        }
+
+        function toggleSoldOut(id) {
+            const p = products.find(x => x.id === id);
+            if(p) {
+                p.isSoldOut = !p.isSoldOut;
+                localStorage.setItem('dubaiBrandProductsDisplay', JSON.stringify(products));
+                renderAdminDashboard();
+                showToast(p.isSoldOut ? 'تم تحويل المنتج إلى: مباع' : 'تم تحويل المنتج إلى: متوفر');
+            }
+        }
+
+        function deleteProduct(id) {
+            if(confirm('هل أنت متأكد من إزالة هذا المنتج من المعرض؟')) {
+                products = products.filter(p => p.id !== id);
+                localStorage.setItem('dubaiBrandProductsDisplay', JSON.stringify(products));
+                renderAdminDashboard();
+                showToast('تم الإزالة بنجاح');
+            }
+        }
+
+        // 8. Utils
+        function getCategoryName(id) {
+            const cat = categories.find(c => c.id === id);
+            return cat ? cat.name : 'غير محدد';
+        }
+
+        function showToast(msg, duration = 3000) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+            }, duration);
+        }
+
+    </script>
+</body>
+</html>
