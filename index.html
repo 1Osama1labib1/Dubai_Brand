@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dubai Brand | دبي براند</title>
+    <title>Dubai Brand | دبي براند للعرض فقط</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -11,6 +11,9 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -34,7 +37,6 @@
         ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #B8860B; }
         
-        /* Modal Animation & Sold Out Effects */
         .modal-enter { animation: modalFadeIn 0.3s ease-out forwards; }
         @keyframes modalFadeIn {
             from { opacity: 0; transform: scale(0.95) translateY(20px); }
@@ -120,6 +122,7 @@
                         <h3 class="text-3xl font-black">أحدث المعروضات</h3>
                         <button onclick="navigate('shop', 'all')" class="text-gold-600 font-bold hover:underline">عرض الكل <i class="fa-solid fa-arrow-left text-sm"></i></button>
                     </div>
+                    <div id="loading-home" class="text-center py-10 text-gray-400 hidden"><i class="fa-solid fa-circle-notch fa-spin text-3xl"></i></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="featured-products"></div>
                 </div>
             </div>
@@ -128,6 +131,7 @@
         <div id="view-shop" class="view-section py-12 max-w-7xl mx-auto px-4">
             <h2 class="text-3xl font-black mb-8" id="shop-title">جميع المنتجات المعروضة</h2>
             <div class="flex gap-2 overflow-x-auto pb-4 mb-8" id="shop-filters"></div>
+            <div id="loading-shop" class="text-center py-10 text-gray-400 hidden"><i class="fa-solid fa-circle-notch fa-spin text-3xl"></i></div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" id="shop-products"></div>
             <div id="shop-empty" class="hidden text-center py-20">
                 <i class="fa-solid fa-box-open text-6xl text-gray-300 mb-4"></i>
@@ -136,18 +140,15 @@
         </div>
 
         <div id="view-product-details" class="view-section py-12 max-w-7xl mx-auto px-4">
-            <button onclick="navigate('shop', 'all')" class="mb-6 text-gray-500 hover:text-gold-600 font-bold flex items-center gap-2">
+            <button onclick="navigate('shop', activeCategory)" class="mb-6 text-gray-500 hover:text-gold-600 font-bold flex items-center gap-2">
                 <i class="fa-solid fa-arrow-right"></i> العودة للمعرض
             </button>
             
             <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden flex flex-col md:flex-row relative">
-                
                 <div id="detail-badge-container"></div>
-
                 <div class="md:w-1/2 p-4 md:p-8 flex justify-center items-center bg-gray-50 relative">
                     <img id="detail-image" src="" alt="صورة المنتج المكبرة" class="max-h-[500px] object-contain rounded-xl mix-blend-multiply transition duration-300">
                 </div>
-
                 <div class="md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
                     <span id="detail-category" class="text-sm font-bold text-gold-600 mb-2 uppercase tracking-wider bg-gold-50 inline-block px-3 py-1 rounded-full w-max"></span>
                     <h2 id="detail-title" class="text-3xl md:text-4xl font-black text-dark mb-4"></h2>
@@ -158,8 +159,7 @@
                         <p id="detail-desc" class="text-gray-600 leading-relaxed"></p>
                     </div>
 
-                    <div id="detail-action-box" class="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center mt-auto">
-                        </div>
+                    <div id="detail-action-box" class="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center mt-auto"></div>
                 </div>
             </div>
         </div>
@@ -199,9 +199,9 @@
                                     <option value="watches">ساعات</option><option value="kids">أطفالي</option>
                                 </select>
                             </div>
-                            <div><label class="block text-sm font-bold mb-1">رابط الصورة (URL)</label><input type="url" id="add-image" required dir="ltr" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none text-left"></div>
+                            <div><label class="block text-sm font-bold mb-1">رابط الصورة المباشر (URL)</label><input type="url" id="add-image" required dir="ltr" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none text-left"></div>
                             <div><label class="block text-sm font-bold mb-1">الوصف</label><textarea id="add-desc" rows="2" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none resize-none"></textarea></div>
-                            <button type="submit" class="w-full bg-dark hover:bg-gold-500 text-white font-bold py-3 rounded-xl transition mt-2">نشر في المعرض</button>
+                            <button type="submit" id="add-btn" class="w-full bg-dark hover:bg-gold-500 text-white font-bold py-3 rounded-xl transition mt-2">نشر في المعرض</button>
                         </form>
                     </div>
                 </div>
@@ -302,7 +302,7 @@
                     </div>
                     <div><label class="block text-sm font-bold mb-1">رابط الصورة (URL)</label><input type="url" id="edit-image" required dir="ltr" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none text-left"></div>
                     <div><label class="block text-sm font-bold mb-1">الوصف</label><textarea id="edit-desc" rows="2" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-gold-500 outline-none resize-none"></textarea></div>
-                    <button type="submit" class="w-full mt-4 bg-gold-500 hover:bg-dark text-white font-bold py-3 rounded-xl transition duration-300">حفظ التعديلات</button>
+                    <button type="submit" id="edit-btn" class="w-full mt-4 bg-gold-500 hover:bg-dark text-white font-bold py-3 rounded-xl transition duration-300">حفظ التعديلات</button>
                 </form>
             </div>
         </div>
@@ -314,7 +314,21 @@
     </div>
 
     <script>
-        // 1. Data Definitions
+        // --- 1. FIREBASE SETUP ---
+        const firebaseConfig = {
+  apiKey: "AIzaSyCTXH8GnbOHeD2pM1KrGOJwW2Chw-DOCtk",
+  authDomain: "dubaibrand-e42a4.firebaseapp.com",
+  projectId: "dubaibrand-e42a4",
+  storageBucket: "dubaibrand-e42a4.firebasestorage.app",
+  messagingSenderId: "802963607911",
+  appId: "1:802963607911:web:70e2b6ab2e4d71a97e1fc2"
+};
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- 2. DATA ---
         const categories = [
             { id: 'all', name: 'الكل', icon: 'fa-border-all' },
             { id: 'clothes', name: 'ملابس خروج', icon: 'fa-shirt' },
@@ -327,31 +341,42 @@
             { id: 'kids', name: 'أطفالي', icon: 'fa-child' }
         ];
 
-        // بيانات تجريبية مع اضافة حالة النفاذ isSoldOut
-        const defaultProducts = [
-            { id: 1, name: 'فستان سهرة كلاسيك', price: 15000, category: 'clothes', isSoldOut: false, image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&q=80&w=800', desc: 'فستان سهرة راقي.' },
-            { id: 2, name: 'طقم بيجاما حرير بيتي', price: 2500, category: 'homewear', isSoldOut: false, image: 'https://images.unsplash.com/photo-1618218168350-6e7c81151b64?auto=format&fit=crop&q=80&w=800', desc: 'طقم بيجاما مريح.' },
-            { id: 3, name: 'حقيبة جلد برادا ستايل', price: 4500, category: 'bags', isSoldOut: false, image: 'https://images.unsplash.com/photo-1584916201218-f4242ceb4809?auto=format&fit=crop&q=80&w=800', desc: 'حقيبة جلدية فاخرة.' },
-            { id: 9, name: 'حذاء كعب عالي (هيلز) أسود', price: 3200, category: 'heels', isSoldOut: true, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=800', desc: 'هيلز أسود كلاسيكي (منتج تجريبي مباع).' },
-            { id: 10, name: 'كوتشي أبيض رياضي', price: 1800, category: 'sneakers', isSoldOut: false, image: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&q=80&w=800', desc: 'كوتشي كاجوال خفيف.' },
-            { id: 4, name: 'عطر دبي عود الذهبي', price: 3500, category: 'perfumes', isSoldOut: false, image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800', desc: 'عطر شرقي بلمسة فرنسية.' },
-            { id: 5, name: 'ساعة رولكس ستايل نسائية', price: 8500, category: 'watches', isSoldOut: false, image: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&q=80&w=800', desc: 'ساعة معدنية.' },
-            { id: 6, name: 'طقم أطفال للعيد', price: 1200, category: 'kids', isSoldOut: false, image: 'https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=800', desc: 'طقم أنيق للأطفال.' },
-        ];
+        let products = [];
+        let activeCategory = 'all';
 
-        // 2. State Management
-        let products = JSON.parse(localStorage.getItem('dubaiBrandProductsDisplay')) || defaultProducts;
-        
-        // إصلاح المنتجات القديمة لإضافة خاصية isSoldOut لها إذا لم تكن موجودة
-        products = products.map(p => ({...p, isSoldOut: p.isSoldOut || false}));
-
-        // 3. Initialization
+        // --- 3. INIT & REALTIME SYNC ---
         document.addEventListener('DOMContentLoaded', () => {
             renderCategoriesUI();
+            
+            // اظهار علامة التحميل
+            document.getElementById('loading-home').classList.remove('hidden');
+            document.getElementById('loading-shop').classList.remove('hidden');
+
+            // جلب المنتجات من السحابة (تتحدث تلقائياً عند أي تغيير)
+            db.collection("products").orderBy("createdAt", "desc").onSnapshot((querySnapshot) => {
+                products = [];
+                querySnapshot.forEach((doc) => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // اخفاء التحميل
+                document.getElementById('loading-home').classList.add('hidden');
+                document.getElementById('loading-shop').classList.add('hidden');
+
+                // تحديث الواجهة المفتوحة حالياً
+                if(document.getElementById('view-home').classList.contains('active')) renderHomeProducts();
+                if(document.getElementById('view-shop').classList.contains('active')) renderShop(activeCategory);
+                if(document.getElementById('view-admin-dashboard').classList.contains('active')) renderAdminDashboard();
+            }, (error) => {
+                console.error("خطأ في جلب البيانات:", error);
+                alert("يرجى التأكد من تفعيل Firestore Database (Test Mode) من حسابك.");
+            });
+
+            // فتح الصفحة الرئيسية كبداية
             navigate('home');
         });
 
-        // 4. Navigation
+        // --- 4. NAVIGATION ---
         function navigate(view, params = null) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             const targetView = document.getElementById(`view-${view}`);
@@ -359,7 +384,10 @@
             window.scrollTo(0, 0);
 
             if (view === 'home') renderHomeProducts();
-            else if (view === 'shop') renderShop(params || 'all');
+            else if (view === 'shop') {
+                activeCategory = params || 'all';
+                renderShop(activeCategory);
+            }
             else if (view === 'product-details' && params) renderProductDetails(params);
             else if (view === 'admin-dashboard') {
                 if(sessionStorage.getItem('dubaiAdmin') !== 'true') return navigate('admin-login');
@@ -367,7 +395,7 @@
             }
         }
 
-        // 5. UI Renderers
+        // --- 5. UI RENDERERS ---
         function renderCategoriesUI() {
             const mobileMenu = document.getElementById('mobile-categories-list');
             const homeGrid = document.getElementById('home-categories-grid');
@@ -395,13 +423,12 @@
         function generateProductCardHTML(product) {
             const soldOutBadge = product.isSoldOut ? `<span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-4 py-1.5 rounded-full z-20 shadow-md">نفذت الكمية</span>` : '';
             const imgClass = product.isSoldOut ? 'out-of-stock-img' : '';
-            
             const btnHtml = product.isSoldOut 
                 ? `<button disabled class="w-full bg-gray-200 text-gray-500 font-bold py-2 rounded-lg cursor-not-allowed flex justify-center items-center gap-2"><i class="fa-solid fa-ban"></i> غير متوفر حالياً</button>`
                 : `<button onclick="event.stopPropagation(); openLocationModal()" class="w-full bg-gray-100 hover:bg-gold-500 hover:text-white text-gray-700 font-bold py-2 rounded-lg transition duration-300 flex justify-center items-center gap-2"><i class="fa-solid fa-location-dot"></i> طريقة الشراء</button>`;
 
             return `
-                <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-gray-100 group cursor-pointer flex flex-col relative" onclick="navigate('product-details', ${product.id})">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-gray-100 group cursor-pointer flex flex-col relative" onclick="navigate('product-details', '${product.id}')">
                     ${soldOutBadge}
                     <div class="relative h-64 overflow-hidden bg-gray-50 flex justify-center items-center">
                         <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500 mix-blend-multiply ${imgClass}" onerror="this.src='https://images.unsplash.com/photo-1555529771-835f59fc5efe?auto=format&fit=crop&q=80&w=800'">
@@ -422,11 +449,12 @@
 
         function renderHomeProducts() {
             const container = document.getElementById('featured-products');
-            const latest = [...products].reverse().slice(0, 4);
+            const latest = products.slice(0, 8); // اول 8 منتجات فقط
             container.innerHTML = latest.map(generateProductCardHTML).join('');
         }
 
         function renderShop(categoryId) {
+            activeCategory = categoryId;
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.className = btn.dataset.id === categoryId 
                     ? "filter-btn px-6 py-2 rounded-full font-bold whitespace-nowrap transition border bg-dark text-white border-dark"
@@ -446,10 +474,9 @@
             }
         }
 
-        // 6. Product Details Logic
         function renderProductDetails(productId) {
             const product = products.find(p => p.id === productId);
-            if(!product) return navigate('shop', 'all');
+            if(!product) return navigate('shop', activeCategory);
 
             const imgElement = document.getElementById('detail-image');
             imgElement.src = product.image;
@@ -512,7 +539,7 @@
         function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
         document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
 
-        // 7. Admin Logic
+        // --- 6. ADMIN & CLOUD CRUD ---
         function adminLogin(e) {
             e.preventDefault();
             const user = document.getElementById('admin-user').value;
@@ -554,74 +581,96 @@
                     <td class="p-4 text-gray-600 text-sm">${getCategoryName(p.category)}</td>
                     <td class="p-4 font-bold text-gold-600">${p.price.toLocaleString('en-US')}</td>
                     <td class="p-4 text-center whitespace-nowrap">
-                        <button onclick="toggleSoldOut(${p.id})" class="text-white font-bold text-xs p-2 rounded transition ${p.isSoldOut ? 'bg-green-500 hover:bg-green-600' : 'bg-orange-500 hover:bg-orange-600'}" title="${p.isSoldOut ? 'تغيير إلى متوفر' : 'تحديد كـ مباع'}">
+                        <button onclick="toggleSoldOut('${p.id}', ${p.isSoldOut})" class="text-white font-bold text-xs p-2 rounded transition ${p.isSoldOut ? 'bg-green-500 hover:bg-green-600' : 'bg-orange-500 hover:bg-orange-600'}" title="${p.isSoldOut ? 'تغيير إلى متوفر' : 'تحديد كـ مباع'}">
                             ${p.isSoldOut ? '<i class="fa-solid fa-check"></i> إرجاع متوفر' : '<i class="fa-solid fa-ban"></i> تحديد مباع'}
                         </button>
-                        <button onclick="openEditModal(${p.id})" class="text-blue-500 hover:bg-blue-100 p-2 rounded transition mx-1" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteProduct(${p.id})" class="text-red-500 hover:bg-red-100 p-2 rounded transition" title="إزالة"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="openEditModal('${p.id}')" class="text-blue-500 hover:bg-blue-100 p-2 rounded transition mx-1" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-100 p-2 rounded transition" title="إزالة"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        function addProduct(e) {
+        // إضافة منتج للسحابة
+        async function addProduct(e) {
             e.preventDefault();
-            const newProd = {
-                id: Date.now(),
-                name: document.getElementById('add-name').value,
-                price: parseFloat(document.getElementById('add-price').value),
-                category: document.getElementById('add-category').value,
-                image: document.getElementById('add-image').value,
-                desc: document.getElementById('add-desc').value,
-                isSoldOut: false
-            };
+            const btn = document.getElementById('add-btn');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري النشر...';
+            btn.disabled = true;
 
-            products.unshift(newProd);
-            localStorage.setItem('dubaiBrandProductsDisplay', JSON.stringify(products));
-            
-            e.target.reset();
-            renderAdminDashboard();
-            showToast('تم إضافة المنتج للمعرض بنجاح');
-        }
-
-        function saveEditProduct(e) {
-            e.preventDefault();
-            const id = parseInt(document.getElementById('edit-id').value);
-            const p = products.find(x => x.id === id);
-            if(p) {
-                p.name = document.getElementById('edit-name').value;
-                p.price = parseFloat(document.getElementById('edit-price').value);
-                p.category = document.getElementById('edit-category').value;
-                p.image = document.getElementById('edit-image').value;
-                p.desc = document.getElementById('edit-desc').value;
+            try {
+                await db.collection("products").add({
+                    name: document.getElementById('add-name').value,
+                    price: parseFloat(document.getElementById('add-price').value),
+                    category: document.getElementById('add-category').value,
+                    image: document.getElementById('add-image').value,
+                    desc: document.getElementById('add-desc').value,
+                    isSoldOut: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp() // ترتيب زمني حقيقي
+                });
                 
-                localStorage.setItem('dubaiBrandProductsDisplay', JSON.stringify(products));
-                renderAdminDashboard();
+                e.target.reset();
+                showToast('تم إضافة المنتج بنجاح. سيظهر للجميع فوراً!');
+            } catch (error) {
+                console.error("خطأ في الإضافة: ", error);
+                alert("حدث خطأ أثناء الإضافة. تأكد من تفعيل الـ Database.");
+            }
+            btn.innerHTML = 'نشر في المعرض';
+            btn.disabled = false;
+        }
+
+        // حفظ التعديلات للسحابة
+        async function saveEditProduct(e) {
+            e.preventDefault();
+            const btn = document.getElementById('edit-btn');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
+            btn.disabled = true;
+
+            const id = document.getElementById('edit-id').value;
+            
+            try {
+                await db.collection("products").doc(id).update({
+                    name: document.getElementById('edit-name').value,
+                    price: parseFloat(document.getElementById('edit-price').value),
+                    category: document.getElementById('edit-category').value,
+                    image: document.getElementById('edit-image').value,
+                    desc: document.getElementById('edit-desc').value
+                });
                 closeEditModal();
-                showToast('تم تعديل المنتج بنجاح');
+                showToast('تم تحديث بيانات المنتج بنجاح');
+            } catch (error) {
+                console.error("خطأ في التعديل: ", error);
+                alert("حدث خطأ أثناء التعديل.");
+            }
+            btn.innerHTML = 'حفظ التعديلات';
+            btn.disabled = false;
+        }
+
+        // تغيير حالة المنتج للسحابة
+        async function toggleSoldOut(id, currentStatus) {
+            try {
+                await db.collection("products").doc(id).update({
+                    isSoldOut: !currentStatus
+                });
+                showToast(!currentStatus ? 'تم تحويل المنتج إلى: مباع' : 'تم تحويل المنتج إلى: متوفر');
+            } catch(error) {
+                console.error("خطأ: ", error);
             }
         }
 
-        function toggleSoldOut(id) {
-            const p = products.find(x => x.id === id);
-            if(p) {
-                p.isSoldOut = !p.isSoldOut;
-                localStorage.setItem('dubaiBrandProductsDisplay', JSON.stringify(products));
-                renderAdminDashboard();
-                showToast(p.isSoldOut ? 'تم تحويل المنتج إلى: مباع' : 'تم تحويل المنتج إلى: متوفر');
+        // حذف منتج من السحابة
+        async function deleteProduct(id) {
+            if(confirm('هل أنت متأكد من إزالة هذا المنتج نهائياً من المعرض؟')) {
+                try {
+                    await db.collection("products").doc(id).delete();
+                    showToast('تم إزالة المنتج نهائياً');
+                } catch(error) {
+                    console.error("خطأ في الحذف: ", error);
+                }
             }
         }
 
-        function deleteProduct(id) {
-            if(confirm('هل أنت متأكد من إزالة هذا المنتج من المعرض؟')) {
-                products = products.filter(p => p.id !== id);
-                localStorage.setItem('dubaiBrandProductsDisplay', JSON.stringify(products));
-                renderAdminDashboard();
-                showToast('تم الإزالة بنجاح');
-            }
-        }
-
-        // 8. Utils
+        // --- 7. UTILS ---
         function getCategoryName(id) {
             const cat = categories.find(c => c.id === id);
             return cat ? cat.name : 'غير محدد';
@@ -637,7 +686,6 @@
                 toast.style.transform = 'translateY(20px)';
             }, duration);
         }
-
     </script>
 </body>
 </html>
